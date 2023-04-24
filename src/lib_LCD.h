@@ -46,7 +46,8 @@ typedef union {
     
 } LCDbits_t;
 
-extern volatile LCDbits_t LCDbits @ 0x008; // Définition de "LCDbits" de type LCDbits_t, avec l'adresse du PORTD
+extern volatile LCDbits_t LCDbits __at(0x008); // Ca ne marche pas avec @
+
 
 // Etape 2 : Developpement de fonctions d'envoi de n'importe quelle instruction
 void lcd_write_instr_4bits(uint8_t rs, uint8_t rw, uint8_t data_4bits);

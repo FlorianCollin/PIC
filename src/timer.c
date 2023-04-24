@@ -21,7 +21,10 @@ void ccp1_init(void) {
 
     // Charge la valeur de comparaison
     //CCPR1 = 32768; // Demi-parcours du Timer1  <----- ici 32768 correspond à la moitié du timer soit 1s
-    CCPR1 = 32768/4;
+    /*
+     * A chaque front d'horloge on a le timer qui s'incremente de 1 donc il faut attendre 32,768 impulsion pour attendre 1s
+     */
+    CCPR1 = 32768;
     // Active l'interruption pour le module CCP1
     PIR1bits.CCP1IF = 0; // Efface le drapeau d'interruption CCP1
     PIE1bits.CCP1IE = 1; // Active l'interruption pour le module CCP1

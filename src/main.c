@@ -1,8 +1,8 @@
 #include <xc.h>
 #include "timer.h"
-//include "lib_LCD.h"
+#include "lib_LCD.h"
 
-//Configure les bits de configuration du microcontrôleur, comme l'oscillateur, le watchdog timer, la protection mémoire, etc.
+//Configure les bits de configuration du microcontrï¿½leur, comme l'oscillateur, le watchdog timer, la protection mï¿½moire, etc.
 
 #pragma config FOSC = HS        // Oscillator Selection bits (HS oscillator)
 #pragma config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled)
@@ -20,19 +20,19 @@
 
 volatile unsigned char interrupt_counter = 0;
 
-void __interrupt() IT() // Cette fonction est appelé à chaque fois que le programme detecte une interuption
+void __interrupt() IT() // Cette fonction est appelï¿½ ï¿½ chaque fois que le programme detecte une interuption
 {
-    if (PIR1bits.TMR1IF) //si on a PIR1bits.TMR1IF qui vaut 1 alors le Timer1 à déborder (il s'agit d'un flag)
+    if (PIR1bits.TMR1IF) //si on a PIR1bits.TMR1IF qui vaut 1 alors le Timer1 ï¿½ dï¿½border (il s'agit d'un flag)
     {
-        // Gère l'interruption du Timer1
-        LED_PIN = 0; // Éteint la LED
-        TMR1 = 0; // Réinitialise la valeur du Timer1
-        PIR1bits.TMR1IF = 0; // Efface le drapeau d'interruption du Timer1 pour pouvoir détecter la prochaine interruption
+        // Gï¿½re l'interruption du Timer1
+        LED_PIN = 0; // ï¿½teint la LED
+        TMR1 = 0; // Rï¿½initialise la valeur du Timer1
+        PIR1bits.TMR1IF = 0; // Efface le drapeau d'interruption du Timer1 pour pouvoir dï¿½tecter la prochaine interruption
     }
 
-    if (PIR1bits.CCP1IF) // On verifie si le flag d'interruption du module CPP est à 1
+    if (PIR1bits.CCP1IF) // On verifie si le flag d'interruption du module CPP est ï¿½ 1
     {
-        // Gère l'interruption du module CCP1
+        // Gï¿½re l'interruption du module CCP1
         LED_PIN = 1; // Allume la LED
         PIR1bits.CCP1IF = 0; // Efface le drapeau d'interruption CCP1, cela va permettre de detecter la prochaine interuprtion du module CPP1
     }
@@ -46,7 +46,7 @@ void init() {
 
     timer1_init();
     ccp1_init();
-    // Active les interruptions globales et périphériques
+    // Active les interruptions globales et pï¿½riphï¿½riques
     INTCONbits.PEIE = 1; // Enable peripheral interrupts
     INTCONbits.GIE = 1; // Enable global interrupts
 
@@ -56,7 +56,7 @@ int main(void) {
     init();
 
     while (1) {
-        // La boucle principale reste vide, car le clignotement de la LED est géré par la routine d'interruption
+        // La boucle principale reste vide, car le clignotement de la LED est gï¿½rï¿½ par la routine d'interruption
     }
 
     return 0;

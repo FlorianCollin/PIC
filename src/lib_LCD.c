@@ -10,12 +10,15 @@
 
 #include "lib_LCD.h"
 
+
+#define _XTAL_FREQ 32768
 /************************************************************************
                                 ETAPE 1
  Simplification des acces 
 ************************************************************************/
 
 // voir dans "Header Files" => lib_LCD.h
+
 
 
 /************************************************************************
@@ -28,8 +31,22 @@
 /// \param rs selectionne le registre de destination (1 bit)
 /// \param rw selectionne s'il s'agit d'une lecture ou d'une ecriture (1 bit)
 /// \param data_4bits est la donnee a ecrire (4 bits)
+
+
 void lcd_write_instr_4bits(uint8_t rs, uint8_t rw, uint8_t data_4bits) {
-    
+/// on set les bits RS et RW
+    LCDbits.RS = rs;
+    LCDbits.RW = rw;
+    LCDbits.DB = data_4bits;
+    // Activation l'horloge Enable 
+    LCDbits.E = 1;
+    // Ajouter un délai pour permettre au module LCD de lire les données
+    __delay_us(500);
+    // Désactiver l'horloge Enable (E) pour indiquer que les données ont été lues
+    LCDbits.E = 0;
+    // Ajouter un délai pour permettre au module LCD de traiter les données
+    __delay_us(500);
+
 }
 
 /// \brief Envoi d'une instruction de 8 bits vers le module LCD
