@@ -12,6 +12,11 @@
 
 
 #define _XTAL_FREQ 32768
+
+/*
+un cycle d'horloge dure  30,517578125 us 
+*/
+
 /************************************************************************
                                 ETAPE 1
  Simplification des acces 
@@ -38,14 +43,10 @@ void lcd_write_instr_4bits(uint8_t rs, uint8_t rw, uint8_t data_4bits) {
     LCDbits.RS = rs;
     LCDbits.RW = rw;
     LCDbits.DB = data_4bits;
-    // Activation l'horloge Enable 
     LCDbits.E = 1;
-    // Ajouter un délai pour permettre au module LCD de lire les données
-    __delay_us(500);
-    // Désactiver l'horloge Enable (E) pour indiquer que les données ont été lues
-    LCDbits.E = 0;
-    // Ajouter un délai pour permettre au module LCD de traiter les données
-    __delay_us(500);
+    __delay_us(1000);
+    LCDbits.E = 0;    
+    __delay_us(1000);
 
 }
 
@@ -53,13 +54,22 @@ void lcd_write_instr_4bits(uint8_t rs, uint8_t rw, uint8_t data_4bits) {
 /// \param rs selectionne le registre de destination (1 bit)
 /// \param rw selectionne s'il s'agit d'une lecture ou d'une ecriture (1 bit)
 /// \param data_8bits est la donnee a ecrire (8 bits)
+
+void set_4bits() {
+    lcd_write_instr_4bits(0b0, 0b0, 0b0011);
+    __delay_ms(5);
+    lcd_write_instr_4bits(0b0, 0b0, 0b0010);
+}
+
 void lcd_write_instr_8bits(uint8_t rs, uint8_t rw, uint8_t data_8bits) {
-    
+    lcd_write_4bits(rs, rw, data_8bits >> 4);
+    lcd_busy();
+    lcd_write_4bits(rs, rw, data_8bits << 4);
 }
 
 /// \brief Attente le temps que la commande precedente ait ete traitee
 void lcd_busy() {
-
+    __delau_us(1000);
 }
 
 
@@ -73,11 +83,14 @@ void lcd_busy() {
 
 /// \brief Effacement de l'ecran
 void lcd_clear() {
-    
+    lcd_write_instr_8bits(0, 0, 0x01);
+    __delay_ms(2);
 }
 
 /// \brief Retour du curseur a l'origine
 void lcd_home() {
+    lcd_write_instr_8bits(0, 0, 0x02);
+    __delay_ms(2);
     
 }
 
@@ -100,7 +113,9 @@ void lcd_display_control(uint8_t display, uint8_t cursor, uint8_t blink) {
 /// \param cursor_display (1 bit)
 /// \param left_right (1 bit)
 void lcd_cursor_display_shift(uint8_t cursor_display, uint8_t left_right) {
-    
+    lcd_write_instr_4bits(0b0, 0b0, 0b0000);
+    lcd_write_instr_4bits(0b0, 0b0, 0b0001);
+
 }
 
 /// \brief Taille des donnees (4 / 8 bits), nombre de lignes, taille des caracteres
