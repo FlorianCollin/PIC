@@ -54,9 +54,15 @@ void init() {
 
 int main(void) {
     init();
-
+    lcd_init();
+    lcd_clear();
+    lcd_home();
+    lcd_cursor_display_shift(1,1);
+    lcd_cursor_display_shift(1,1);
+    lcd_cursor_display_shift(1,1);
     while (1) {
-        // La boucle principale reste vide, car le clignotement de la LED est g�r� par la routine d'interruption
+        
+
     }
 
     return 0;

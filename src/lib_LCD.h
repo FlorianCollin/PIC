@@ -60,7 +60,8 @@ void lcd_busy();
 #define LCD_CLEAR_DISPLAY_INSTR   0b00000001
 #define LCD_RETURN_HOME_INSTR     0b00000010
 #define LCD_ENTRY_MODE_INSTR      0b00000100
-//...
+#define LCD_DISPLAY_CONTROL       0b00001000
+#define LCD_FONCTION_SET          0b00100000
 
 // definition des bits specifiques aux fonctions :
 // Entry mode set :

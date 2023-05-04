@@ -11,11 +11,7 @@
 #include "lib_LCD.h"
 
 
-#define _XTAL_FREQ 32768
-
-/*
-un cycle d'horloge dure  30,517578125 us 
-*/
+#define _XTAL_FREQ 20000000
 
 /************************************************************************
                                 ETAPE 1
@@ -40,13 +36,15 @@ un cycle d'horloge dure  30,517578125 us
 
 void lcd_write_instr_4bits(uint8_t rs, uint8_t rw, uint8_t data_4bits) {
 /// on set les bits RS et RW
+    //on affectent les bits
     LCDbits.RS = rs;
     LCDbits.RW = rw;
     LCDbits.DB = data_4bits;
+    
     LCDbits.E = 1;
-    __delay_us(1000);
+    __delay_ms(1);
     LCDbits.E = 0;    
-    __delay_us(1000);
+    __delay_ms(1);
 
 }
 
@@ -55,21 +53,16 @@ void lcd_write_instr_4bits(uint8_t rs, uint8_t rw, uint8_t data_4bits) {
 /// \param rw selectionne s'il s'agit d'une lecture ou d'une ecriture (1 bit)
 /// \param data_8bits est la donnee a ecrire (8 bits)
 
-void set_4bits() {
-    lcd_write_instr_4bits(0b0, 0b0, 0b0011);
-    __delay_ms(5);
-    lcd_write_instr_4bits(0b0, 0b0, 0b0010);
-}
-
 void lcd_write_instr_8bits(uint8_t rs, uint8_t rw, uint8_t data_8bits) {
-    lcd_write_4bits(rs, rw, data_8bits >> 4);
+    lcd_write_instr_4bits(rs, rw, data_8bits >> 4);
     lcd_busy();
-    lcd_write_4bits(rs, rw, data_8bits << 4);
+    lcd_write_instr_4bits(rs, rw, data_8bits << 4);
+    lcd_busy();
 }
 
 /// \brief Attente le temps que la commande precedente ait ete traitee
 void lcd_busy() {
-    __delau_us(1000);
+    __delay_ms(1);
 }
 
 
@@ -83,14 +76,13 @@ void lcd_busy() {
 
 /// \brief Effacement de l'ecran
 void lcd_clear() {
-    lcd_write_instr_8bits(0, 0, 0x01);
-    __delay_ms(2);
+    lcd_write_instr_8bits(0, 0, LCD_CLEAR_DISPLAY_INSTR);
 }
 
 /// \brief Retour du curseur a l'origine
 void lcd_home() {
-    lcd_write_instr_8bits(0, 0, 0x02);
-    __delay_ms(2);
+    //return home
+    lcd_write_instr_8bits(0, 0, LCD_RETURN_HOME_INSTR);
     
 }
 
@@ -98,15 +90,17 @@ void lcd_home() {
 /// \param inc_dec (1 bit)
 /// \param shift (1 bit)
 void lcd_entry_mode_set(uint8_t inc_dec, uint8_t shift) {
-    
-}
+    uint8_t mot = LCD_ENTRY_MODE_INSTR + inc_dec * 0x02 + shift * 0x01;
+    lcd_write_instr_8bits(0, 0, mot);
 
+}
 /// \brief Ecran ON/OFF, Curseur ON/OFF, Clignotement ON/OFF
 /// \param display (1 bit)
 /// \param cursor (1 bit)
 /// \param blink (1 bit)
 void lcd_display_control(uint8_t display, uint8_t cursor, uint8_t blink) {
-    
+    uint8_t mot = LCD_DISPLAY_CONTROL + display * 0x04 + cursor * 0x02 + blink;
+    lcd_write_instr_8bits(0, 0, mot);
 }
 
 /// \brief Deplacement du curseur ou de l'affichage d'un cran a gauche ou a droite
@@ -123,7 +117,9 @@ void lcd_cursor_display_shift(uint8_t cursor_display, uint8_t left_right) {
 /// \param lines (1 bit)
 /// \param font (1 bit)
 void lcd_function_set(uint8_t data_length, uint8_t lines, uint8_t font) {
-    
+    uint8_t mot = LCD_DISPLAY_CONTROL + data_length * 0x10 + lines * 0x08 + font * 0x04;
+    lcd_write_instr_8bits(0, 0, mot);
+
 }
 
 
@@ -136,7 +132,28 @@ void lcd_function_set(uint8_t data_length, uint8_t lines, uint8_t font) {
 
 /// \brief Initialisation generale de l'afficheur
 void lcd_init() {
-    
+
+    __delay_ms(15);
+    lcd_write_instr_4bits(0, 0, 0x3);
+    __delay_ms(5);
+    lcd_write_instr_4bits(0, 0, 0x3);
+    __delay_us(150);
+
+    lcd_write_instr_4bits(0, 0, 0x2);
+
+    lcd_write_instr_4bits(0, 0, 0x2);
+    lcd_write_instr_4bits(0, 0, 0x0); // voir paramètre en haut de la page 6
+
+
+    lcd_write_instr_4bits(0, 0, 0x00);
+    lcd_write_instr_4bits(0, 0, 0x08);
+
+    lcd_write_instr_4bits(0, 0, 0x00);
+    lcd_write_instr_4bits(0, 0, 0x04);
+
+    __delay_ms(1); 
+
+    // fin de l'init
 }
 
 
