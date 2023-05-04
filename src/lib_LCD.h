@@ -19,8 +19,6 @@
 
 
 
-
-
 // Etape 1 : Simplification des acces
 // voir https://git.io/EN111PR => 3. Developpement de la bibliotheque pour l'afficheur LCD 
 
@@ -41,7 +39,7 @@ typedef union {
 	struct {
 		unsigned DB              :4;  // bits 0 à 3 : données
 		unsigned OPERATION       :2;  // bits 4 et 5 : RS et RW : définissent le type d'opération
-		unsigned                 :2;  // E et POWER déjà définis, facultatif
+		unsigned EP              :2;  // E et POWER déjà définis, facultatif
 	};
     
 } LCDbits_t;
@@ -90,5 +88,15 @@ void lcd_putch(char c);
 void lcd_puts(const char *s);
 void lcd_shift_cursor(int8_t amount);
 void lcd_pos(uint8_t pos, uint8_t ligne);
+
+
+
+
+//test
+
+void xy_lcd(unsigned char x, unsigned char y);
+void aff_car(unsigned char c);
+void aff_txt(unsigned char *message);
+
 
 #endif	/* __LIB_LCD */

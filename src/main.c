@@ -56,14 +56,12 @@ int main(void) {
     init();
     lcd_init();
     lcd_clear();
-    lcd_home();
-    lcd_cursor_display_shift(1,1);
-    lcd_cursor_display_shift(1,1);
-    lcd_cursor_display_shift(1,1);
-    while (1) {
-        
 
-    }
+    while (1) {
+
+    lcd_display_control(1,1,1);
+  
+    }   
 
     return 0;
 }
