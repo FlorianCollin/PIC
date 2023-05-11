@@ -2,7 +2,7 @@
 #include "timer.h"
 #include "lib_LCD.h"
 
-//Configure les bits de configuration du microcontr�leur, comme l'oscillateur, le watchdog timer, la protection m�moire, etc.
+//Configure les bits de configuration du microcontr?leur, comme l'oscillateur, le watchdog timer, la protection m?moire, etc.
 
 #pragma config FOSC = HS        // Oscillator Selection bits (HS oscillator)
 #pragma config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled)
@@ -20,19 +20,19 @@
 
 volatile unsigned char interrupt_counter = 0;
 
-void __interrupt() IT() // Cette fonction est appel� � chaque fois que le programme detecte une interuption
+void __interrupt() IT() // Cette fonction est appel? ? chaque fois que le programme detecte une interuption
 {
-    if (PIR1bits.TMR1IF) //si on a PIR1bits.TMR1IF qui vaut 1 alors le Timer1 � d�border (il s'agit d'un flag)
+    if (PIR1bits.TMR1IF) //si on a PIR1bits.TMR1IF qui vaut 1 alors le Timer1 ? d?border (il s'agit d'un flag)
     {
-        // G�re l'interruption du Timer1
-        LED_PIN = 0; // �teint la LED
-        TMR1 = 0; // R�initialise la valeur du Timer1
-        PIR1bits.TMR1IF = 0; // Efface le drapeau d'interruption du Timer1 pour pouvoir d�tecter la prochaine interruption
+        // G?re l'interruption du Timer1
+        LED_PIN = 0; // ?teint la LED
+        TMR1 = 0; // R?initialise la valeur du Timer1
+        PIR1bits.TMR1IF = 0; // Efface le drapeau d'interruption du Timer1 pour pouvoir d?tecter la prochaine interruption
     }
 
-    if (PIR1bits.CCP1IF) // On verifie si le flag d'interruption du module CPP est � 1
+    if (PIR1bits.CCP1IF) // On verifie si le flag d'interruption du module CPP est ? 1
     {
-        // G�re l'interruption du module CCP1
+        // G?re l'interruption du module CCP1
         LED_PIN = 1; // Allume la LED
         PIR1bits.CCP1IF = 0; // Efface le drapeau d'interruption CCP1, cela va permettre de detecter la prochaine interuprtion du module CPP1
     }
@@ -46,7 +46,7 @@ void init() {
 
     timer1_init();
     ccp1_init();
-    // Active les interruptions globales et p�riph�riques
+    // Active les interruptions globales et p?riph?riques
     INTCONbits.PEIE = 1; // Enable peripheral interrupts
     INTCONbits.GIE = 1; // Enable global interrupts
 
@@ -55,11 +55,9 @@ void init() {
 int main(void) {
     init();
     lcd_init();
-    lcd_clear();
-
+    lcd_home();
+    
     while (1) {
-
-    lcd_display_control(1,1,1);
   
     }   
 

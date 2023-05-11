@@ -38,15 +38,17 @@
 void lcd_write_instr_4bits(uint8_t rs, uint8_t rw, uint8_t data_4bits) {
 /// on set les bits RS et RW
     //on affectent les bits
-    LCDbits.EP = 0b01;
+    //LCDbits.EP = 0b01;
+    LCDbits.E = 0;    
+
     LCDbits.RS = rs;
     LCDbits.RW = rw;
     LCDbits.DB = data_4bits;
     //test
-    LCDbits.DB4 = data_4bits & 0b00000001;
-    LCDbits.DB5 = data_4bits & 0b00000010;
-    LCDbits.DB6 = data_4bits & 0b00000100;
-    LCDbits.DB7 = data_4bits & 0b00001000;
+    //LCDbits.DB4 = data_4bits & 0b00000001;
+    //LCDbits.DB5 = data_4bits & 0b00000010;
+    //LCDbits.DB6 = data_4bits & 0b00000100;
+    //LCDbits.DB7 = data_4bits & 0b00001000;
 
     LCDbits.E = 1;
     __delay_ms(1);
@@ -61,10 +63,14 @@ void lcd_write_instr_4bits(uint8_t rs, uint8_t rw, uint8_t data_4bits) {
 /// \param data_8bits est la donnee a ecrire (8 bits)
 
 void lcd_write_instr_8bits(uint8_t rs, uint8_t rw, uint8_t data_8bits) {
-    lcd_write_instr_4bits(rs, rw, data_8bits >> 4);
+    uint8_t data_high = data_8bits & 0b00001111;
+    uint8_t data_low = data_8bits & 0b11110000;
+    data_low >> 4;
+    lcd_write_instr_4bits(rs, rw, data_high);
     lcd_busy();
-    lcd_write_instr_4bits(rs, rw, data_8bits << 4);
-    lcd_busy();
+    lcd_write_instr_4bits(rs, rw, data_low);
+
+
 }
 
 /// \brief Attente le temps que la commande precedente ait ete traitee
@@ -114,8 +120,9 @@ void lcd_display_control(uint8_t display, uint8_t cursor, uint8_t blink) {
 /// \param cursor_display (1 bit)
 /// \param left_right (1 bit)
 void lcd_cursor_display_shift(uint8_t cursor_display, uint8_t left_right) {
-    lcd_write_instr_4bits(0b0, 0b0, 0b0000);
     lcd_write_instr_4bits(0b0, 0b0, 0b0001);
+    
+    lcd_write_instr_4bits(0b0, 0b0, 0b0000 + cursor_display << 3 + left_right << 2);
 
 }
 
@@ -130,12 +137,6 @@ void lcd_function_set(uint8_t data_length, uint8_t lines, uint8_t font) {
 }
 
 
-/**************************************************************************************
-void xy_lcd(unsigned char x, unsigned char y)
- 
-Positionne le curseur aux coordonnées (x, y) : 1 <= x <= 16 et 1 <= y <= 2.
- 
-**************************************************************************************/
 void xy_lcd(unsigned char x, unsigned char y){
  
 	if (y==1)
@@ -148,30 +149,13 @@ void xy_lcd(unsigned char x, unsigned char y){
  
 }
  
-/**************************************************************************************
-void aff_car(unsigned char c)
- 
-Affiche à la position du curseur le caractère dont le code ascii est c.
- 
-**************************************************************************************/
+
 void aff_car(unsigned char c){
  
 	lcd_write_instr_8bits(1,0,c);
 }
  
-/**************************************************************************************
- 
-void aff_txt(unsigned char *message)
- 
-Affiche, à la position du curseur, le texte " message ".
- 
-*message : pointeur sur le message stocké en ROM (mémoire Flash).
- 
-Option
- 
-\r placé dans message provoque le retour au début de la ligne suivante.
- 
-**************************************************************************************/
+
 void aff_txt(unsigned char *message){
  
 	while(*message!= '\0'){	        //écriture sur le LCD de toute la chaîne.
@@ -196,30 +180,11 @@ void aff_txt(unsigned char *message){
 /// \brief Initialisation generale de l'afficheur
 void lcd_init() {
     TRISD = 0x00;
-    int curseur =  2;
-    // __delay_ms(15);
-    // lcd_write_instr_8bits(0, 0, 0x30);
-    // __delay_ms(5);
-    // lcd_write_instr_8bits(0, 0, 0x30);
-    // __delay_us(150);
-
-    // lcd_write_instr_8bits(0, 0, 0x20);
-
-    // lcd_write_instr_8bits(0, 0, 0x20);
-    // lcd_write_instr_8bits(0, 0, 0x00); // voir paramètre en haut de la page 6
-
-
-    // lcd_write_instr_8bits(0, 0, 0x00);
-    // lcd_write_instr_8bits(0, 0, 0x80);
-
-    // lcd_write_instr_8bits(0, 0, 0x00);
-    // lcd_write_instr_8bits(0, 0, 0x10);
-
-    // lcd_write_instr_8bits(0, 0, 0x00);
-    // lcd_write_instr_8bits(0, 0, 0x60);
-
+    PORTDbits.RD7 = 1;
+    __delay_ms(15);
+    
     lcd_write_instr_8bits(0,0,0x03);
-    __delay_us(4500);
+    __delay_ms(5);
 
     lcd_write_instr_8bits(0,0,0x03);
     __delay_us(4500);
@@ -228,35 +193,14 @@ void lcd_init() {
     __delay_us(150);
 
     lcd_write_instr_8bits(0,0,0x02);
- 
-	lcd_write_instr_8bits(0,0,0x28);         //adressage 4 Bits, afficheur 2 lignes.
-    __delay_ms(1);
- 
-	lcd_write_instr_8bits(0,0,0x06);         //incrémente l'adresse DD-RAM (l'affichage se décale vers la droite).
- 
-	lcd_write_instr_8bits(0,0,0x01);         //effacement de l'écran et curseur positionné en haut à gauche.
- 
-	switch(curseur){
- 
-	case 0:
-		lcd_write_instr_8bits(0,0,0x0C);		//curseur hors service, affichage actif.
-		break;
- 
-	case 1:
-		lcd_write_instr_8bits(0,0,0x0E);		//curseur en service, affichage actif.
-		break;
- 
-	case 2:
-		lcd_write_instr_8bits(0,0,0x0F); 	//curseur clignotant en service.
-		break;
- 
-	default:
-		break;
-	};
- 
-    __delay_ms(1); 
-
-    // fin de l'init
+    
+    //__delay_ms(1);
+    
+    lcd_function_set(0,1,0); // 2 lignes 5*8 cara
+    lcd_display_control(1,1,1);
+    lcd_clear();
+    //lcd_entry_mode_set(0,0);
+    
 }
 
 
