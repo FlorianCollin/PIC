@@ -39,21 +39,20 @@ void lcd_write_instr_4bits(uint8_t rs, uint8_t rw, uint8_t data_4bits) {
 /// on set les bits RS et RW
     //on affectent les bits
     //LCDbits.EP = 0b01;
+    
     LCDbits.E = 0;    
 
     LCDbits.RS = rs;
     LCDbits.RW = rw;
     LCDbits.DB = data_4bits;
-    //test
-    //LCDbits.DB4 = data_4bits & 0b00000001;
-    //LCDbits.DB5 = data_4bits & 0b00000010;
-    //LCDbits.DB6 = data_4bits & 0b00000100;
-    //LCDbits.DB7 = data_4bits & 0b00001000;
+
 
     LCDbits.E = 1;
     __delay_ms(1);
     LCDbits.E = 0;    
     __delay_ms(2);
+    
+    
 
 }
 
@@ -63,9 +62,10 @@ void lcd_write_instr_4bits(uint8_t rs, uint8_t rw, uint8_t data_4bits) {
 /// \param data_8bits est la donnee a ecrire (8 bits)
 
 void lcd_write_instr_8bits(uint8_t rs, uint8_t rw, uint8_t data_8bits) {
-    uint8_t data_high = data_8bits & 0b00001111;
-    uint8_t data_low = data_8bits & 0b11110000;
-    data_low >> 4;
+    uint8_t tmp = data_8bits;
+    uint8_t data_low = tmp & 0b00001111;
+    uint8_t data_high = (data_8bits >> 4) & 0b00001111;
+
     lcd_write_instr_4bits(rs, rw, data_high);
     lcd_busy();
     lcd_write_instr_4bits(rs, rw, data_low);
@@ -137,37 +137,7 @@ void lcd_function_set(uint8_t data_length, uint8_t lines, uint8_t font) {
 }
 
 
-void xy_lcd(unsigned char x, unsigned char y){
- 
-	if (y==1)
-		lcd_write_instr_8bits(0,0,0x80+x-1);               //positionne la ligne 1 aux coordonnées (x, 1).
- 
-	if (y==2)
-		lcd_write_instr_8bits(0,0,0xC0+x-1);               //positionne la ligne 2 aux coordonnées (x, 2).
- 
- 
- 
-}
- 
 
-void aff_car(unsigned char c){
- 
-	lcd_write_instr_8bits(1,0,c);
-}
- 
-
-void aff_txt(unsigned char *message){
- 
-	while(*message!= '\0'){	        //écriture sur le LCD de toute la chaîne.
- 
-		if(*message=='\r')
-			xy_lcd(1,2);
-		else
-			aff_car(*message);          //écriture sur le LCD d'un caractère du message.
- 
-		message++;
-	};
-}
 
 
 /************************************************************************
@@ -179,28 +149,33 @@ void aff_txt(unsigned char *message){
 
 /// \brief Initialisation generale de l'afficheur
 void lcd_init() {
+    
     TRISD = 0x00;
     PORTDbits.RD7 = 1;
-    __delay_ms(15);
     
-    lcd_write_instr_8bits(0,0,0x03);
+    __delay_ms(50);
+    
+    lcd_write_instr_4bits(0,0,0b0011);
     __delay_ms(5);
 
-    lcd_write_instr_8bits(0,0,0x03);
-    __delay_us(4500);
+    lcd_write_instr_4bits(0,0,0b0011);
+    __delay_us(200);
 
-    lcd_write_instr_8bits(0,0,0x03);
-    __delay_us(150);
+    lcd_write_instr_4bits(0,0,0b0011);
 
-    lcd_write_instr_8bits(0,0,0x02);
-    
-    //__delay_ms(1);
+    lcd_write_instr_4bits(0,0,0b0010);
+
+    // on peut desormais faire des instructions 8bits
     
     lcd_function_set(0,1,0); // 2 lignes 5*8 cara
-    lcd_display_control(1,1,1);
+    lcd_display_control(0,0,0);
     lcd_clear();
-    //lcd_entry_mode_set(0,0);
+    lcd_entry_mode_set(1,0);
+    lcd_display_control(1,1,1);
+   
     
+    
+
 }
 
 
@@ -211,14 +186,21 @@ void lcd_init() {
 
 /// \brief Ecriture d'un caractere sur l'afficheur
 /// \param c est le caratere a envoyer
-void lcd_putch(char c) {
-    
+void lcd_putch(uint8_t c) {
+    lcd_write_instr_8bits(1,0,c);
 }
 
 /// \brief Ecriture d'une chaine de caracteres sur l'afficheur
 /// \param s est la chaine de carateres a envoyer
 void lcd_puts(const char *s) {
-    
+    char k = 0;
+    char tmp = s[k];
+    while (tmp != '\0') {
+        lcd_putch(tmp);
+        k++;
+
+        tmp = s[k];
+    }
 }
 
 /// \brief Deplacement du curseur de "amount" crans. 
@@ -226,12 +208,19 @@ void lcd_puts(const char *s) {
 ///        amount negatif = vers la gauche
 ///        amount positif = vers la droite
 void lcd_shift_cursor(int8_t amount) {
-    
+    int k = 0;
+    for (k = 0; k<amount; k++) {
+        lcd_putch(' ');
+    }
 }
 
 /// \brief Positionnement du curseur en (x,y). Origine en (1,1)
 /// \param pos est la position horizontale
 /// \param ligne est la position verticale
 void lcd_pos(uint8_t pos, uint8_t ligne) {
-    
+    if (ligne == 1){
+        // on ce place sur la ligne 1     ATTENTION les lignes sont num�rot�s de 0 � 1
+        lcd_write_instr_8bits(0,0,0b11000000);
+    }
+    lcd_shift_cursor(pos);
 }

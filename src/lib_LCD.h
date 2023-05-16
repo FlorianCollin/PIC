@@ -84,7 +84,7 @@ void lcd_function_set(uint8_t data_length, uint8_t lines, uint8_t font);
 void lcd_init();
 
 // Etape 5 : Developpement des fonctions utilisateur restantes.
-void lcd_putch(char c);
+void lcd_putch(uint8_t c);
 void lcd_puts(const char *s);
 void lcd_shift_cursor(int8_t amount);
 void lcd_pos(uint8_t pos, uint8_t ligne);
@@ -92,11 +92,6 @@ void lcd_pos(uint8_t pos, uint8_t ligne);
 
 
 
-//test
-
-void xy_lcd(unsigned char x, unsigned char y);
-void aff_car(unsigned char c);
-void aff_txt(unsigned char *message);
 
 
 #endif	/* __LIB_LCD */
